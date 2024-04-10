@@ -1,11 +1,12 @@
 import dotenv from "dotenv";
 dotenv.config({ path: ".env" });
 
+import ip from "ip";
+
 import { app } from "./app.js";
 import { connectDB } from "./data/database.js";
 import cloudinary from "cloudinary";
 import Stripe from "stripe";
-
 
 connectDB();
 
@@ -17,11 +18,9 @@ cloudinary.v2.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-console.log('env: ', process.env.PORT);
-
-
 app.listen(process.env.PORT, () => {
+  const PORT = process.env.PORT;
   console.log(
-    `Server listening on port: ${process.env.PORT}, in ${process.env.NODE_ENV} MODE.`
+    `Example server listening at http://localhost:${PORT} - http://${ip.address()}:${PORT}`
   );
 });
