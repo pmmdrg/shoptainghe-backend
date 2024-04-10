@@ -60,7 +60,7 @@
  *           description: The ID of the user who placed the order
  *         paymentMethod:
  *           type: string
- *           enum: 
+ *           enum:
  *             - COD
  *             - ONLINE
  *           default: COD
@@ -199,12 +199,11 @@
  *                     type: string
  */
 
-
-
 import express from "express";
 import {
   createOrder,
   getAdminOrders,
+  getLatestProductByOrder,
   getMyOrders,
   getOrderDetails,
   proccessOrder,
@@ -219,6 +218,8 @@ router.post("/payment", isAuthenticated, processPayment);
 
 router.get("/my", isAuthenticated, getMyOrders);
 router.get("/admin", isAuthenticated, isAdmin, getAdminOrders);
+
+router.get("/sort", isAuthenticated, getLatestProductByOrder);
 
 router
   .route("/single/:id")
