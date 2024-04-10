@@ -39,7 +39,7 @@
  *           description: The pin code of the user
  *         role:
  *           type: string
- *           enum: 
+ *           enum:
  *             - admin
  *             - user
  *           default: user
@@ -304,7 +304,6 @@
  *                   message:
  *                     type: string
  */
-
 
 import express from "express";
 import {
