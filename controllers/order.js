@@ -63,6 +63,19 @@ export const getAdminOrders = asyncError(async (req, res, next) => {
   });
 });
 
+export const getLatestProductByOrder = asyncError(async (req, res, next) => {
+  const ordersSort = await Order.find().sort({ createdAt: -1 }).limit(10);
+  const productLatest = [];
+  ordersSort.forEach((order) => {
+    productLatest.push(order.orderItems);
+  });
+
+  res.status(200).json({
+    success: true,
+    productLatest,
+  });
+});
+
 export const getMyOrders = asyncError(async (req, res, next) => {
   const orders = await Order.find({ user: req.user._id });
 

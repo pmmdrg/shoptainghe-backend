@@ -30,7 +30,6 @@ export const login = asyncError(async (req, res, next) => {
 
 export const signup = asyncError(async (req, res, next) => {
   const { name, email, password, address, city, country, pinCode } = req.body;
-  console.log("body: ", req.body);
 
   let user = await User.findOne({ email });
 
@@ -45,6 +44,11 @@ export const signup = asyncError(async (req, res, next) => {
       public_id: myCloud.public_id,
       url: myCloud.secure_url,
     };
+  } else {
+    avatar = {
+      public_id: "0d64989794b1a4c9d89bff571d3d5842_zhcxr1",
+      url: "https://res.cloudinary.com/dgia24ogl/image/upload/v1712734993/0d64989794b1a4c9d89bff571d3d5842_zhcxr1.jpg",
+    };
   }
 
   user = await User.create({
@@ -57,7 +61,6 @@ export const signup = asyncError(async (req, res, next) => {
     country,
     pinCode,
   });
-  console.log("user: ", user);
 
   sendToken(user, res, `Registered Successfully`, 201);
 });
