@@ -12,6 +12,18 @@ connectDB();
 
 export const stripe = new Stripe(process.env.STRIPE_API_SECRET);
 
+stripe.paymentIntents
+  .create({
+    amount: Number(5000 * 100),
+    currency: "inr",
+  })
+  .then((result) => {
+    console.log(result);
+  })
+  .catch((err) => {
+    console.log(err);
+  });
+
 cloudinary.v2.config({
   cloud_name: process.env.CLOUDINARY_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
