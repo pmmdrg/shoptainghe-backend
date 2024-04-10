@@ -1,14 +1,27 @@
-const http = require("http");
-const app = require("./app");
-const server = http.createServer(app);
-require("./database/db"); //import the database
+import dotenv from "dotenv";
+dotenv.config({ path: ".env" });
 
-if (process.env.NODE_ENV !== "production") {
-  require("dotenv").config();
-}
-const port = process.env.PORT || 3000;
+import { app } from "./app.js";
+import { connectDB } from "./data/database.js";
+import cloudinary from "cloudinary";
+import Stripe from "stripe";
 
-server.listen(port, () => {
-  console.log(`Server is running on http://localhost:${port}`);
+
+connectDB();
+
+export const stripe = new Stripe(process.env.STRIPE_API_SECRET);
+
+cloudinary.v2.config({
+  cloud_name: process.env.CLOUDINARY_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
+console.log('env: ', process.env.PORT);
+
+
+app.listen(process.env.PORT, () => {
+  console.log(
+    `Server listening on port: ${process.env.PORT}, in ${process.env.NODE_ENV} MODE.`
+  );
+});

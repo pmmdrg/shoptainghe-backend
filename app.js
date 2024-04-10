@@ -1,45 +1,47 @@
-const express = require("express");
-const app = express();
-const bodyParser = require("body-parser");
-const swaggerUi = require("swagger-ui-express");
-const cors = require("cors");
+import express from "express";
+import { config } from "dotenv";
+import { errorMiddleware } from "./middlewares/error.js";
+import cookieParser from "cookie-parser";
+import cors from "cors";
 
-const categoryRoute = require("./routes/cateRoute");
-const productRoute = require("./routes/prodRoute");
-const cartRoute = require("./routes/cartRoute");
-const adminRoute = require("./routes/adminRoute");
-const userRoute = require("./routes/userRoute");
-const swaggerDocument = require("./swagger.json");
+import swaggerui from "swagger-ui-express"
+import {swaggerSpec} from './swagger.js';
 
-// Use body parser middleware to parse body of incoming requests
-app.use(express.static('./public'));
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(bodyParser.json());
-app.use(cors());
-
-// Routes which should handle requests
-app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument)); //still working on it
-app.use("/product", productRoute);
-app.use("/category", categoryRoute);
-app.use("/cart", cartRoute);
-app.use("/admin", adminRoute);
-app.use("/user", userRoute);
-// Handle Error Requests
-
-app.get("/", (req, res) => {
-  res.send('API IS NOW WORKING, append "/docs" to the current url to access API documentation');
+config({
+  path: "./data/config.env",
 });
 
-// Handle Error Requests
-app.use((req, res, next) => {
-  const error = new Error();
-  error.message = "Not Found";
-  error.status = 404;
-  next(error);
+export const app = express();
+
+
+app.use("/swagger",
+  swaggerui.serve,
+  swaggerui.setup(swaggerSpec)
+)
+
+// Using Middlewares
+app.use(express.json());
+app.use(cookieParser());
+app.use(
+  cors({
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    origin: [process.env.FRONTEND_URI_1, process.env.FRONTEND_URI_2],
+  })
+);
+
+app.get("/", (req, res, next) => {
+  res.send("Working");
 });
 
-app.use((error, req, res, next) => {
-  res.status(error.status || 500).json({ error: error });
-});
+// Importing Routers here
+import user from "./routes/user.js";
+import product from "./routes/product.js";
+import order from "./routes/order.js";
 
-module.exports = app;
+app.use("/api/v1/user", user);
+app.use("/api/v1/product", product);
+app.use("/api/v1/order", order);
+
+// Using Error Middleware
+app.use(errorMiddleware);
