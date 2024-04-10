@@ -1,23 +1,14 @@
 import express from "express";
-import { config } from "dotenv";
 import { errorMiddleware } from "./middlewares/error.js";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 
-import swaggerui from "swagger-ui-express"
-import {swaggerSpec} from './swagger.js';
-
-config({
-  path: "./data/config.env",
-});
+import swaggerui from "swagger-ui-express";
+import { swaggerSpec } from "./swagger.js";
 
 export const app = express();
 
-
-app.use("/swagger",
-  swaggerui.serve,
-  swaggerui.setup(swaggerSpec)
-)
+app.use("/swagger", swaggerui.serve, swaggerui.setup(swaggerSpec));
 
 // Using Middlewares
 app.use(express.json());
