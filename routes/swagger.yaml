@@ -1,0 +1,916 @@
+components:
+  schemas:
+    User:
+      type: object
+      required:
+        - name
+        - email
+        - password
+        - address
+        - city
+        - country
+        - pinCode
+      properties:
+        name:
+          type: string
+          description: The name of the user
+        email:
+          type: string
+          format: email
+          description: The email of the user
+        password:
+          type: string
+          minLength: 6
+          description: The password of the user (must be at least 6 characters long)
+        address:
+          type: string
+          description: The address of the user
+        city:
+          type: string
+          description: The city of the user
+        country:
+          type: string
+          description: The country of the user
+        pinCode:
+          type: integer
+          format: int32
+          description: The pin code of the user
+        role:
+          type: string
+          enum: 
+            - admin
+            - user
+          default: user
+          description: The role of the user
+        avatar:
+          type: object
+          properties:
+            public_id:
+              type: string
+              description: The public ID of the avatar image
+            url:
+              type: string
+              description: The URL of the avatar image
+        otp:
+          type: integer
+          description: One-Time Password for user authentication
+        otp_expire:
+          type: string
+          format: date-time
+          description: Expiration date and time of the One-Time Password
+    Product:
+      type: object
+      required:
+        - name
+        - description
+        - price
+        - stock
+      properties:
+        name:
+          type: string
+          description: The name of the product
+        description:
+          type: string
+          description: The description of the product
+        price:
+          type: number
+          format: float
+          description: The price of the product
+        stock:
+          type: integer
+          description: The stock quantity of the product
+        images:
+          type: array
+          items:
+            type: object
+            properties:
+              public_id:
+                type: string
+                description: The public ID of the image
+              url:
+                type: string
+                format: uri
+                description: The URL of the image
+          description: Array of images associated with the product
+        category:
+          type: string
+          format: uuid
+          description: The ID of the category that the product belongs to
+        createdAt:
+          type: string
+          format: date-time
+          description: The date and time when the product was created
+    Order:
+      type: object
+      required:
+        - shippingInfo
+        - orderItems
+        - user
+        - paymentMethod
+        - itemsPrice
+        - taxPrice
+        - shippingCharges
+        - totalAmount
+      properties:
+        shippingInfo:
+          type: object
+          properties:
+            address:
+              type: string
+              description: The shipping address
+            city:
+              type: string
+              description: The city for shipping
+            country:
+              type: string
+              description: The country for shipping
+            pinCode:
+              type: integer
+              description: The postal code for shipping
+          description: Information related to shipping
+        orderItems:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+                description: The name of the ordered item
+              price:
+                type: number
+                format: float
+                description: The price of the ordered item
+              quantity:
+                type: integer
+                description: The quantity of the ordered item
+              image:
+                type: string
+                format: uri
+                description: The image URL of the ordered item
+              product:
+                type: string
+                format: uuid
+                description: The ID of the product associated with the ordered item
+          description: List of items in the order
+        user:
+          type: string
+          format: uuid
+          description: The ID of the user who placed the order
+        paymentMethod:
+          type: string
+          enum: 
+            - COD
+            - ONLINE
+          default: COD
+          description: The payment method used for the order
+        paidAt:
+          type: string
+          format: date-time
+          description: The date and time when the payment was made
+        paymentInfo:
+          type: object
+          properties:
+            id:
+              type: string
+              description: The ID of the payment transaction
+            status:
+              type: string
+              description: The status of the payment transaction
+          description: Information related to payment
+        itemsPrice:
+          type: number
+          format: float
+          description: The total price of all items in the order
+        taxPrice:
+          type: number
+          format: float
+          description: The total tax amount for the order
+        shippingCharges:
+          type: number
+          format: float
+          description: The shipping charges for the order
+        totalAmount:
+          type: number
+          format: float
+          description: The total amount to be paid for the order
+        orderStatus:
+          type: string
+          enum:
+            - Preparing
+            - Shipped
+            - Delivered
+          default: Preparing
+          description: The current status of the order
+        deliveredAt:
+          type: string
+          format: date-time
+          description: The date and time when the order was delivered
+        createdAt:
+          type: string
+          format: date-time
+          description: The date and time when the order was created
+
+tags:
+  - name: Users
+    description: API endpoints for user management
+  - name: Products
+    description: API endpoints for product management
+  - name: Order
+    description: API endpoints for order management
+paths:
+  /user/new:
+    post:
+      summary: Register a new user
+      tags: [Users]
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                email:
+                  type: string
+                password:
+                  type: string
+                avatar:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: Successfully registered a new user
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '400':
+          description: Bad request, registration failed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+  /user/login:
+    post:
+      summary: Login user
+      tags: [Users]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '200':
+          description: Successfully logged in
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '401':
+          description: Unauthorized, login failed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+  /user/me:
+    get:
+      summary: Get current user information
+      tags: [Users]
+      responses:
+        '200':
+          description: Successfully retrieved user information
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    type: object
+                    properties:
+                      _id:
+                        type: string
+                      name:
+                        type: string
+                      email:
+                        type: string
+        '401':
+          description: Unauthorized, user information retrieval failed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+  /user/logout:
+    get:
+      summary: Logout user
+      tags: [Users]
+      responses:
+        '200':
+          description: Successfully logged out
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '401':
+          description: Unauthorized, logout failed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+  /user/changepassword:
+    put:
+      summary: Update user password
+      tags: [Users]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                oldPassword:
+                  type: string
+                newPassword:
+                  type: string
+      responses:
+        '200':
+          description: Successfully updated user password
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '401':
+          description: Unauthorized, failed to update user password
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+  /user/updateprofile:
+    put:
+      summary: Update user profile
+      tags: [Users]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                email:
+                  type: string
+                address:
+                  type: string
+                city:
+                  type: string
+                country:
+                  type: string
+                pinCode:
+                  type: number
+      responses:
+        '200':
+          description: Successfully updated user profile
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '401':
+          description: Unauthorized, failed to update user profile
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+  /user/updatepic:
+    put:
+      summary: Update user profile picture
+      tags: [Users]
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                avatar:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: Successfully updated user profile picture
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '401':
+          description: Unauthorized, failed to update user profile picture
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+  /product/all:
+    get:
+      summary: Get all products
+      tags: [Products]
+      parameters:
+        - in: query
+          name: keyword
+          schema:
+            type: string
+          description: Keyword for searching products
+        - in: query
+          name: category
+          schema:
+            type: string
+          description: Category id for filtering products
+      responses:
+        '200':
+          description: Successfully retrieved all products
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  products:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Product'
+        '401':
+          description: Unauthorized, unable to retrieve products
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+  /product/admin:
+    get:
+      summary: Get all products for admin
+      tags: [Products]
+      responses:
+        '200':
+          description: Successfully retrieved all products for admin
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  products:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Product'
+        '401':
+          description: Unauthorized, unable to retrieve products for admin
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+  /product/find:
+    get:
+      summary: Find product by name
+      tags: [Products]
+      parameters:
+        - in: query
+          name: keyword
+          schema:
+            type: string
+          description: Keyword for searching products
+      responses:
+        '200':
+          description: Successfully retrieved all products
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  products:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Product'
+        '401':
+          description: Unauthorized, unable to retrieve products
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+  /product/single/{id}:
+    get:
+      summary: Get details of a single product
+      tags: [Products]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          description: ID of the product to retrieve
+      responses:
+        '200':
+          description: Successfully retrieved details of the product
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        '401':
+          description: Unauthorized, unable to retrieve product details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+    put:
+      summary: Update product details
+      tags: [Products]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          description: ID of the product to update
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                description:
+                  type: string
+                price:
+                  type: number
+                stock:
+                  type: number
+                category:
+                  type: string
+      responses:
+        '200':
+          description: Product updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '401':
+          description: Unauthorized, failed to update product
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+  /product/category:
+    post:
+      summary: Add a new category
+      tags: [Products]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                category:
+                  type: string
+      responses:
+        '200':
+          description: Category added successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '401':
+          description: Unauthorized, failed to add category
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+  /product/category/{id}:
+    delete:
+      summary: Delete a category
+      tags: [Products]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          description: ID of the category to delete
+      responses:
+        '200':
+          description: Category deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '401':
+          description: Unauthorized, failed to delete category
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+  /product/new:
+    post:
+      summary: Create a new product
+      tags: [Products]
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                description:
+                  type: string
+                price:
+                  type: number
+                stock:
+                  type: number
+                images:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      public_id:
+                        type: string
+                      url:
+                        type: string
+                category:
+                  type: string
+      responses:
+        '200':
+          description: Product created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '401':
+          description: Unauthorized, failed to create product
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+  /order/new:
+    post:
+      summary: Place a new order
+      tags: [Order]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                orderItems:
+                  type: array
+                  items:
+                shippingInfo:
+                paymentMethod:
+                  type: string
+                  enum: [COD, ONLINE]
+                itemsPrice:
+                  type: number
+                taxPrice:
+                  type: number
+                shippingCharges:
+                  type: number
+                totalAmount:
+                  type: number
+                paymentInfo:
+                  type: object
+      responses:
+        '200':
+          description: Order placed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '401':
+          description: Unauthorized, failed to place order
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+  /order/single/{id}:
+    put:
+      summary: Process an order
+      tags: [Order]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Order processed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '401':
+          description: Unauthorized, failed to process order
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+  /order/payment:
+    post:
+      summary: Process payment for an order
+      tags: [Order]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                orderId:
+                  type: string
+                  description: The ID of the order for payment
+                paymentMethod:
+                  type: string
+                  enum: [COD, ONLINE]
+              required:
+                - orderId
+                - paymentMethod
+      responses:
+        '200':
+          description: Payment processed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '401':
+          description: Unauthorized, failed to process payment
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+  /order/my:
+    get:
+      summary: Get orders of the authenticated user
+      tags: [Order]
+      responses:
+        '200':
+          description: Returns the authenticated user's orders
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Order'
+        '401':
+          description: Unauthorized, failed to get orders
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+  /order/admin:
+    get:
+      summary: Get all orders (admin access required)
+      tags: [Order]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Returns all orders
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Order'
+        '401':
+          description: Unauthorized, admin access required
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+  /order/sort:
+    get:
+      summary: Retrieve the 10 latest product from orders (admin access required)
+      tags: [Order]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Returns all orders
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Order'
+        '401':
+          description: Unauthorized, admin access required
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string

@@ -214,3 +214,22 @@ export const deleteCategory = asyncError(async (req, res, next) => {
     message: "Category Deleted Successfully",
   });
 });
+
+export const createComment = asyncError(async (req, res, next) => {
+  const { comment, vote } = req.body;
+  const product = await Product.findById(req.params.id);
+
+  const opinion = {
+    comment: comment,
+    vote: vote,
+  };
+
+  product.comments.push(opinion);
+
+  await product.save();
+
+  res.status(200).json({
+    success: true,
+    product,
+  });
+});

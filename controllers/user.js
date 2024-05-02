@@ -1,4 +1,5 @@
 import { asyncError } from "../middlewares/error.js";
+import { Order } from "../models/order.js";
 import { User } from "../models/user.js";
 import ErrorHandler from "../utils/error.js";
 import {
@@ -208,5 +209,24 @@ export const resetpassword = asyncError(async (req, res, next) => {
   res.status(200).json({
     success: true,
     message: "Password Changed Successfully, You can login now",
+  });
+});
+
+export const checkUserHasBoughtProduct = asyncError(async (req, res, next) => {
+  const productId = req.query.productId;
+  const orders = await Order.find({ user: req.user._id });
+
+  let productList = [];
+  orders.map((order) => {
+    order.orderItems.forEach((products) => {
+      productList.push(products.product.toString());
+    });
+  });
+
+  productList = [...new Set(productList)];
+  const isBought = productList.some((productItem) => productItem === productId);
+
+  res.status(200).json({
+    success: isBought,
   });
 });
