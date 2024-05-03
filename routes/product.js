@@ -10,6 +10,7 @@ import {
   getAllCategories,
   getAllProducts,
   getProductByName,
+  getProductByCategory,
   getProductDetails,
   updateProduct,
   createComment,
@@ -22,6 +23,7 @@ const router = express.Router();
 router.get("/all", getAllProducts);
 router.get("/admin", isAuthenticated, isAdmin, getAdminProducts);
 router.get("/find", getProductByName);
+router.get("/findCategory", getProductByCategory);
 
 router
   .route("/single/:id")
