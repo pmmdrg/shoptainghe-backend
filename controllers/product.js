@@ -7,24 +7,41 @@ import { Category } from '../models/category.js';
 
 export const getAllProducts = asyncError(async (req, res, next) => {
   const { keyword, category } = req.query;
-
+  console.log(keyword);
   let products = [];
 
   if (!keyword && !category) {
     products = await Product.find().populate('category');
   } else {
+    console.log('hi');
     products = await Product.find({
       name: {
         $regex: keyword ? keyword : '',
         $options: 'i',
       },
-      category: category ? category : undefined,
+
+      // category: category ? category : undefined,
     }).populate('category');
   }
 
   res.status(200).json({
     success: true,
     products,
+  });
+});
+
+export const getProductByCategory = asyncError(async (req, res, next) => {
+  const { category } = req.query;
+
+  const product = await Product.find({
+    category: {
+      $regex: category ? category : '',
+      $options: 'i',
+    },
+  });
+  res.status(200).json({
+    success: true,
+    product,
   });
 });
 
