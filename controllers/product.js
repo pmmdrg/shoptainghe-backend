@@ -7,20 +7,18 @@ import { Category } from "../models/category.js";
 
 export const getAllProducts = asyncError(async (req, res, next) => {
   const { keyword, category } = req.query;
-  console.log(keyword);
+
   let products = [];
 
   if (!keyword && !category) {
     products = await Product.find().populate("category");
   } else {
-    console.log("hi");
     products = await Product.find({
       name: {
         $regex: keyword ? keyword : "",
         $options: "i",
       },
-
-      // category: category ? category : undefined,
+      category: category ? category : undefined,
     }).populate("category");
   }
 
@@ -30,20 +28,10 @@ export const getAllProducts = asyncError(async (req, res, next) => {
   });
 });
 
-export const getProductByCategory = asyncError(async (req, res, next) => {
-  const { category } = req.query || "";
-
-  const products = await Product.find().populate("category");
-  res.status(200).json({
-    success: true,
-    products: products.filter((p) => p.category.category.includes(category)),
-  });
-});
-
 export const getProductByName = asyncError(async (req, res, next) => {
   const { keyword } = req.query;
 
-  const products = await Product.find({
+  const product = await Product.find({
     name: {
       $regex: keyword ? keyword : "",
       $options: "i",
@@ -51,7 +39,7 @@ export const getProductByName = asyncError(async (req, res, next) => {
   });
   res.status(200).json({
     success: true,
-    products,
+    product,
   });
 });
 
@@ -228,12 +216,15 @@ export const deleteCategory = asyncError(async (req, res, next) => {
 });
 
 export const createComment = asyncError(async (req, res, next) => {
+  const ownComment = req.user.name;
+
   const { comment, vote } = req.body;
   const product = await Product.findById(req.params.id);
 
   const opinion = {
     comment: comment,
     vote: vote,
+    voteBy: ownComment,
   };
 
   product.comments.push(opinion);
