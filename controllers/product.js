@@ -1,9 +1,9 @@
-import { asyncError } from "../middlewares/error.js";
-import { Product } from "../models/product.js";
-import ErrorHandler from "../utils/error.js";
-import { getDataUri } from "../utils/features.js";
-import cloudinary from "cloudinary";
-import { Category } from "../models/category.js";
+import { asyncError } from '../middlewares/error.js';
+import { Product } from '../models/product.js';
+import ErrorHandler from '../utils/error.js';
+import { getDataUri } from '../utils/features.js';
+import cloudinary from 'cloudinary';
+import { Category } from '../models/category.js';
 
 export const getAllProducts = asyncError(async (req, res, next) => {
   const { keyword, category } = req.query;
@@ -11,15 +11,15 @@ export const getAllProducts = asyncError(async (req, res, next) => {
   let products = [];
 
   if (!keyword && !category) {
-    products = await Product.find().populate("category");
+    products = await Product.find().populate('category');
   } else {
     products = await Product.find({
       name: {
-        $regex: keyword ? keyword : "",
-        $options: "i",
+        $regex: keyword ? keyword : '',
+        $options: 'i',
       },
       category: category ? category : undefined,
-    }).populate("category");
+    }).populate('category');
   }
 
   res.status(200).json({
@@ -33,8 +33,8 @@ export const getProductByName = asyncError(async (req, res, next) => {
 
   const product = await Product.find({
     name: {
-      $regex: keyword ? keyword : "",
-      $options: "i",
+      $regex: keyword ? keyword : '',
+      $options: 'i',
     },
   });
   res.status(200).json({
@@ -44,7 +44,7 @@ export const getProductByName = asyncError(async (req, res, next) => {
 });
 
 export const getAdminProducts = asyncError(async (req, res, next) => {
-  const products = await Product.find({}).populate("category");
+  const products = await Product.find({}).populate('category');
 
   const outOfStock = products.filter((i) => i.stock === 0);
 
@@ -57,9 +57,9 @@ export const getAdminProducts = asyncError(async (req, res, next) => {
 });
 
 export const getProductDetails = asyncError(async (req, res, next) => {
-  const product = await Product.findById(req.params.id).populate("category");
+  const product = await Product.findById(req.params.id).populate('category');
 
-  if (!product) return next(new ErrorHandler("Product not found", 404));
+  if (!product) return next(new ErrorHandler('Product not found', 404));
 
   res.status(200).json({
     success: true,
@@ -70,7 +70,7 @@ export const getProductDetails = asyncError(async (req, res, next) => {
 export const createProduct = asyncError(async (req, res, next) => {
   const { name, description, category, price, stock } = req.body;
 
-  if (!req.file) return next(new ErrorHandler("Please add image", 400));
+  if (!req.file) return next(new ErrorHandler('Please add image', 400));
 
   const file = getDataUri(req.file);
   const myCloud = await cloudinary.v2.uploader.upload(file.content);
@@ -90,7 +90,7 @@ export const createProduct = asyncError(async (req, res, next) => {
 
   res.status(200).json({
     success: true,
-    message: "Product Created Successfully",
+    message: 'Product Created Successfully',
   });
 });
 
@@ -98,7 +98,7 @@ export const updateProduct = asyncError(async (req, res, next) => {
   const { name, description, category, price, stock } = req.body;
 
   const product = await Product.findById(req.params.id);
-  if (!product) return next(new ErrorHandler("Product not found", 404));
+  if (!product) return next(new ErrorHandler('Product not found', 404));
 
   if (name) product.name = name;
   if (description) product.description = description;
@@ -110,15 +110,15 @@ export const updateProduct = asyncError(async (req, res, next) => {
 
   res.status(200).json({
     success: true,
-    message: "Product Updated Successfully",
+    message: 'Product Updated Successfully',
   });
 });
 
 export const addProductImage = asyncError(async (req, res, next) => {
   const product = await Product.findById(req.params.id);
-  if (!product) return next(new ErrorHandler("Product not found", 404));
+  if (!product) return next(new ErrorHandler('Product not found', 404));
 
-  if (!req.file) return next(new ErrorHandler("Please add image", 400));
+  if (!req.file) return next(new ErrorHandler('Please add image', 400));
 
   const file = getDataUri(req.file);
   const myCloud = await cloudinary.v2.uploader.upload(file.content);
@@ -132,17 +132,17 @@ export const addProductImage = asyncError(async (req, res, next) => {
 
   res.status(200).json({
     success: true,
-    message: "Image Added Successfully",
+    message: 'Image Added Successfully',
   });
 });
 
 export const deleteProductImage = asyncError(async (req, res, next) => {
   const product = await Product.findById(req.params.id);
-  if (!product) return next(new ErrorHandler("Product not found", 404));
+  if (!product) return next(new ErrorHandler('Product not found', 404));
 
   const id = req.query.id;
 
-  if (!id) return next(new ErrorHandler("Please Image Id", 400));
+  if (!id) return next(new ErrorHandler('Please Image Id', 400));
 
   let isExist = -1;
 
@@ -160,13 +160,13 @@ export const deleteProductImage = asyncError(async (req, res, next) => {
 
   res.status(200).json({
     success: true,
-    message: "Image Deleted Successfully",
+    message: 'Image Deleted Successfully',
   });
 });
 
 export const deleteProduct = asyncError(async (req, res, next) => {
   const product = await Product.findById(req.params.id);
-  if (!product) return next(new ErrorHandler("Product not found", 404));
+  if (!product) return next(new ErrorHandler('Product not found', 404));
 
   for (let index = 0; index < product.images.length; index++) {
     await cloudinary.v2.uploader.destroy(product.images[index].public_id);
@@ -174,7 +174,7 @@ export const deleteProduct = asyncError(async (req, res, next) => {
   await product.remove();
   res.status(200).json({
     success: true,
-    message: "Product Deleted Successfully",
+    message: 'Product Deleted Successfully',
   });
 });
 
@@ -183,7 +183,7 @@ export const addCategory = asyncError(async (req, res, next) => {
 
   res.status(201).json({
     success: true,
-    message: "Category Added Successfully",
+    message: 'Category Added Successfully',
   });
 });
 
@@ -198,7 +198,7 @@ export const getAllCategories = asyncError(async (req, res, next) => {
 
 export const deleteCategory = asyncError(async (req, res, next) => {
   const category = await Category.findById(req.params.id);
-  if (!category) return next(new ErrorHandler("Category Not Found", 404));
+  if (!category) return next(new ErrorHandler('Category Not Found', 404));
   const products = await Product.find({ category: category._id });
 
   for (let i = 0; i < products.length; i++) {
@@ -211,7 +211,7 @@ export const deleteCategory = asyncError(async (req, res, next) => {
 
   res.status(200).json({
     success: true,
-    message: "Category Deleted Successfully",
+    message: 'Category Deleted Successfully',
   });
 });
 
