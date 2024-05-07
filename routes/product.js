@@ -38,7 +38,7 @@ router
   .post(isAuthenticated, isAdmin, singleUpload, addProductImage)
   .delete(isAuthenticated, isAdmin, deleteProductImage);
 
-router.post("/comment/:id", isAuthenticated, createComment);
+router.post("/comment", isAuthenticated, createComment);
 
 router.post("/category", isAuthenticated, isAdmin, addCategory);
 

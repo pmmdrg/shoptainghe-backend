@@ -231,7 +231,7 @@ export const createComment = asyncError(async (req, res, next) => {
   const ownComment = req.user.name;
 
   const { comment, vote } = req.body;
-  const product = await Product.findById(req.params.id);
+  const product = await Product.findById(req.query.productId);
 
   const opinion = {
     comment: comment,
